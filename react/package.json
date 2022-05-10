@@ -1,6 +1,6 @@
 {
   "name": "@opengovsg/design-system-react",
-  "version": "0.0.7-beta.0",
+  "version": "0.0.7-beta.1",
   "description": "React components",
   "homepage": "https://github.com/opengovsg/design-system/react#readme",
   "bugs": "https://github.com/opengovsg/design-system/issues",
@@ -26,8 +26,8 @@
     "libphonenumber-js": "^1.9.44",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-icons": "^4.3.1",
-    "react-markdown": "^6.0.3 || ^8.0.0"
+    "react-markdown": "^6.0.3 || ^8.0.0",
+    "react-textarea-autosize": "^8.3.3"
   },
   "devDependencies": {
     "@babel/core": "^7.14.6",
@@ -52,7 +52,6 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-hook-form": "^7.24.2",
-    "react-icons": "^4.3.1",
     "react-markdown": "^6.0.3",
     "rimraf": "^3.0.2",
     "rollup-plugin-copy": "^3.4.0",

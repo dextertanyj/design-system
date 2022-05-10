@@ -13,12 +13,11 @@ export default defineConfig({
   },
   build: {
     lib: {
-      entry: resolve(__dirname, 'src', 'index.ts'),
+      entry: resolve(__dirname, 'src/index.ts'),
       name: 'design-system-react',
-      formats: ['cjs', 'es'],
-      // for UMD name: 'GlobalName'
     },
     rollupOptions: {
+      external: ['react', 'react-dom', /@chakra-ui\/.*/],
       plugins: [
         peerDepsExternal(),
         copy({
@@ -28,10 +27,18 @@ export default defineConfig({
       ],
       output: [
         {
+          globals: {
+            react: 'React',
+            'react-dom': 'ReactDOM',
+          },
           dir: 'dist/cjs',
           format: 'cjs',
         },
         {
+          globals: {
+            react: 'React',
+            'react-dom': 'ReactDOM',
+          },
           exports: 'named',
           dir: 'dist',
           preserveModules: true,
