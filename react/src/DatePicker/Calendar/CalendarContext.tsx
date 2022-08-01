@@ -4,6 +4,7 @@ import {
   SetStateAction,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from 'react'
@@ -11,8 +12,10 @@ import { useKey } from 'react-use'
 import {
   addMonths,
   differenceInCalendarMonths,
+  endOfDay,
   isFirstDayOfMonth,
   isSameDay,
+  startOfDay,
 } from 'date-fns'
 import { Props as DayzedProps, RenderProps, useDayzed } from 'dayzed'
 import { inRange } from 'lodash'
@@ -24,7 +27,6 @@ import {
   getDateFromClassName,
   getMonthOffsetFromToday,
   getNewDateFromKeyPress,
-  getYearOptions,
 } from '../utils'
 
 const ARROW_KEY_NAMES = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']
@@ -64,22 +66,37 @@ type PassthroughProps = {
    * Date currently being hovered, if any.
    */
   hoveredDate?: Date
+  /**
+   * The first date available for selection.
+   * Must be before `endDate`
+   */
+  startDate?: Date
+  /**
+   * The last date available for selection.
+   * Must be after `startDate`
+   */
+  endDate?: Date
 }
+
 type UseProvideCalendarProps = Pick<DayzedProps, 'monthsToDisplay'> &
   PassthroughProps
 
-interface CalendarContextProps extends DatePickerProps, PassthroughProps {
+interface CalendarContextProps
+  extends DatePickerProps,
+    Omit<PassthroughProps, 'startDate' | 'endDate'> {
   uuid: string
   currMonth: number
   currYear: number
   setCurrMonth: Dispatch<SetStateAction<number>>
   setCurrYear: Dispatch<SetStateAction<number>>
   renderProps: RenderProps
-  yearOptions: number[]
   isDateFocusable: (d: Date) => boolean
   handleTodayClick: () => void
   dateToFocus: Date
   selectedDates?: Date | Date[]
+  // Context will at least set default values for start and end date
+  startDate: Date
+  endDate: Date
 }
 
 const CalendarContext = createContext<CalendarContextProps | undefined>(
@@ -122,23 +139,56 @@ const useProvideCalendar = ({
   onMouseLeaveCalendar,
   isDateInRange,
   hoveredDate,
+  startDate = new Date(1500, 0, 1),
+  endDate = new Date(2500, 11, 31),
 }: UseProvideCalendarProps) => {
   // Ensure that calculations are always made based on date of initial render,
   // so component state doesn't suddenly jump at midnight
   const today = useMemo(() => new Date(), [])
   // Unique className for dates
   const uuid = useMemo(() => generateValidUuidClass(), [])
-  const yearOptions = useMemo(() => getYearOptions(), [])
 
-  // Date to focus on initial render if initialFocusRef is passed
+  // Time sensitive for disabling today button
+  startDate = useMemo(() => startOfDay(startDate), [startDate])
+  endDate = useMemo(() => endOfDay(endDate), [endDate])
+
+  /**
+   * Date to focus on initial render if initialFocusRef is passed
+   *
+   * If a selected date is present, attempt to focus on first selected date,
+   * otherwise attempt to focus on today.
+   *
+   * Recaluates on change of start and end date to ensure
+   * that focused date is within range.
+   * Otherwise, focus on the date closest to the target.
+   */
   const dateToFocus = useMemo(() => {
+    let target: Date = today
     if (Array.isArray(selectedDates)) {
-      return selectedDates[0] ?? today
+      target = selectedDates[0]
+    } else if (selectedDates) {
+      target = selectedDates
     }
-    return selectedDates ?? today
-  }, [today, selectedDates])
+    if (target.valueOf() < startDate.valueOf()) {
+      return startDate
+    }
+    if (target.valueOf() > endDate.valueOf()) {
+      return endDate
+    }
+    return target
+  }, [today, selectedDates, startDate, endDate])
+
   const [currMonth, setCurrMonth] = useState<number>(dateToFocus.getMonth())
   const [currYear, setCurrYear] = useState<number>(dateToFocus.getFullYear())
+
+  /**
+   * Ensures that the date to focus is always in view,
+   * even after initial render.
+   */
+  useEffect(() => {
+    setCurrMonth(dateToFocus.getMonth())
+    setCurrYear(dateToFocus.getFullYear())
+  }, [dateToFocus])
 
   /**
    * Updates the current year and month when the forward/back arrows are clicked.
@@ -189,6 +239,23 @@ const useProvideCalendar = ({
       }
     },
     [currMonth, currYear, monthsToDisplay],
+  )
+
+  // Disable dates outside of range to prevent scrolling outside of selectable dates.
+  const restrictedRangeIsDateUnavailable = useCallback(
+    (d: Date) => {
+      if (
+        d.valueOf() < startDate.valueOf() ||
+        d.valueOf() > endDate.valueOf()
+      ) {
+        return true
+      }
+      if (isDateUnavailable) {
+        return isDateUnavailable(d)
+      }
+      return false
+    },
+    [startDate, endDate, isDateUnavailable],
   )
 
   /**
@@ -282,8 +349,7 @@ const useProvideCalendar = ({
     setCurrMonth,
     setCurrYear,
     renderProps,
-    yearOptions,
-    isDateUnavailable,
+    isDateUnavailable: restrictedRangeIsDateUnavailable,
     selectedDates,
     onSelectDate,
     isDateFocusable,
@@ -293,5 +359,7 @@ const useProvideCalendar = ({
     onMouseLeaveCalendar,
     isDateInRange,
     hoveredDate,
+    startDate,
+    endDate,
   }
 }

@@ -15,31 +15,29 @@ export type IsoDateString = Opaque<string, 'IsoDateString'>
 /**
  * Full names of calendar months
  */
-export const MONTH_NAMES: { shortName: string; fullName: string }[] = [
-  { fullName: 'January', shortName: 'Jan' },
-  { fullName: 'February', shortName: 'Feb' },
-  { fullName: 'March', shortName: 'Mar' },
-  { fullName: 'April', shortName: 'Apr' },
-  { fullName: 'May', shortName: 'May' },
-  { fullName: 'June', shortName: 'Jun' },
-  { fullName: 'July', shortName: 'Jul' },
-  { fullName: 'August', shortName: 'Aug' },
-  { fullName: 'September', shortName: 'Sep' },
-  { fullName: 'October', shortName: 'Oct' },
-  { fullName: 'November', shortName: 'Nov' },
-  { fullName: 'December', shortName: 'Dec' },
+export const MONTH_NAMES: {
+  shortName: string
+  fullName: string
+  index: number
+}[] = [
+  { fullName: 'January', shortName: 'Jan', index: 0 },
+  { fullName: 'February', shortName: 'Feb', index: 1 },
+  { fullName: 'March', shortName: 'Mar', index: 2 },
+  { fullName: 'April', shortName: 'Apr', index: 3 },
+  { fullName: 'May', shortName: 'May', index: 4 },
+  { fullName: 'June', shortName: 'Jun', index: 5 },
+  { fullName: 'July', shortName: 'Jul', index: 6 },
+  { fullName: 'August', shortName: 'Aug', index: 7 },
+  { fullName: 'September', shortName: 'Sep', index: 8 },
+  { fullName: 'October', shortName: 'Oct', index: 9 },
+  { fullName: 'November', shortName: 'Nov', index: 10 },
+  { fullName: 'December', shortName: 'Dec', index: 11 },
 ]
 
 /**
  * Names of days to display at top of calendar columns
  */
 export const DAY_NAMES = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
-
-/**
- * Generates array of years which are options in the year dropdown.
- * @returns array of years
- */
-export const getYearOptions = (): number[] => range(1500, 2500)
 
 /**
  * Finds the number of months by which a target date is offset from today.

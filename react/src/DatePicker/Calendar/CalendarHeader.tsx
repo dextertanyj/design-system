@@ -9,6 +9,7 @@ import {
   useStyles,
 } from '@chakra-ui/react'
 import { addMonths } from 'date-fns/esm'
+import { range } from 'lodash'
 
 import { IconButton } from '~/IconButton'
 import { BxChevronLeft } from '~/icons/BxChevronLeft'
@@ -49,8 +50,15 @@ const MonthYearSelect = ({
 }
 
 const SelectableMonthYear = memo(() => {
-  const { currMonth, setCurrMonth, currYear, setCurrYear, yearOptions } =
+  const { currMonth, setCurrMonth, currYear, setCurrYear, startDate, endDate } =
     useCalendar()
+
+  const yearOptions = useMemo(
+    () => {
+      return range(startDate.getFullYear(), endDate.getFullYear() + 1)
+    }, // Include end date year
+    [startDate, endDate],
+  )
 
   const shouldUseMonthFullName = useBreakpointValue({
     base: false,
@@ -58,12 +66,24 @@ const SelectableMonthYear = memo(() => {
   })
 
   const memoizedMonthOptions = useMemo(() => {
-    return MONTH_NAMES.map(({ shortName, fullName }, index) => (
+    // Copy to prevent mutating original array
+    const selectableMonths = [...MONTH_NAMES]
+    if (currYear === yearOptions.at(0)) {
+      const monthsToRemove = startDate.getMonth()
+      // Remove any months before the start date.
+      selectableMonths.splice(0, monthsToRemove)
+    }
+    if (currYear === yearOptions.at(-1)) {
+      // Remove any months after the end date.
+      const monthsToRemove = 11 - endDate.getMonth()
+      selectableMonths.splice(monthsToRemove * -1, monthsToRemove)
+    }
+    return selectableMonths.map(({ shortName, fullName, index }) => (
       <option value={index} key={index}>
         {shouldUseMonthFullName ? fullName : shortName}
       </option>
     ))
-  }, [shouldUseMonthFullName])
+  }, [shouldUseMonthFullName, currYear, startDate, endDate, yearOptions])
 
   const memoizedYearOptions = useMemo(() => {
     return yearOptions.map((year, index) => (
@@ -146,8 +166,36 @@ export const CalendarHeader = memo(
   ({ monthOffset }: CalendarHeaderProps): JSX.Element => {
     const styles = useStyles()
     const {
+      currMonth,
+      currYear,
+      startDate,
+      endDate,
       renderProps: { calendars, getBackProps, getForwardProps },
     } = useCalendar()
+
+    const { disabled: _backDisabled, ...restBackProps } = getBackProps({
+      calendars,
+    })
+    const { disabled: _forwardDisabled, ...restForwardProps } = getForwardProps(
+      {
+        calendars,
+      },
+    )
+
+    const startYear = useMemo(() => startDate.getFullYear(), [startDate])
+    const startMonth = useMemo(() => startDate.getMonth(), [startDate])
+    const endYear = useMemo(() => endDate.getFullYear(), [endDate])
+    const endMonth = useMemo(() => endDate.getMonth(), [endDate])
+
+    const isBackDisabled = useMemo(
+      () => currYear === startYear && currMonth === startMonth,
+      [startMonth, startYear, currMonth, currYear],
+    )
+
+    const isForwardDisabled = useMemo(
+      () => currYear === endYear && currMonth === endMonth,
+      [endMonth, endYear, currMonth, currYear],
+    )
 
     return (
       <Flex sx={styles.monthYearSelectorContainer}>
@@ -162,17 +210,19 @@ export const CalendarHeader = memo(
               variant="clear"
               colorScheme="secondary"
               icon={<BxChevronLeft />}
+              disabled={isBackDisabled}
               aria-label="Back one month"
               minW={{ base: '1.75rem', xs: '2.75rem', sm: '2.75rem' }}
-              {...getBackProps({ calendars })}
+              {...restBackProps}
             />
             <IconButton
               variant="clear"
               colorScheme="secondary"
               icon={<BxChevronRight />}
+              disabled={isForwardDisabled}
               aria-label="Forward one month"
               minW={{ base: '1.75rem', xs: '2.75rem', sm: '2.75rem' }}
-              {...getForwardProps({ calendars })}
+              {...restForwardProps}
             />
           </Flex>
         ) : null}
