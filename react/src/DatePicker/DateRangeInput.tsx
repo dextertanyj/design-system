@@ -25,11 +25,12 @@ import { IconButton } from '~/IconButton'
 import { BxCalendar } from '~/icons/BxCalendar'
 import { Input, InputProps } from '~/Input'
 
-import { DateRangePicker } from './DateRangePicker'
+import { DateRangePicker, DateRangePickerProps } from './DateRangePicker'
 import { convertToDateString, IsoDateString } from './utils'
 
 export interface DateRangeInputProps
-  extends Omit<InputProps, 'value' | 'onChange'> {
+  extends Omit<InputProps, 'value' | 'onChange'>,
+    Pick<DateRangePickerProps, 'startDate' | 'endDate'> {
   value?: IsoDateString[]
   onChange?: (val: IsoDateString[]) => void
 }
@@ -163,6 +164,7 @@ export const DateRangeInput = forwardRef<DateRangeInputProps, 'input'>(
     return (
       <Wrap shouldWrapChildren spacing="0.25rem">
         <Wrap shouldWrapChildren spacing="0.5rem" align="center">
+          {/* TODO: Prevent input of out of range dates */}
           <Input
             aria-label="Start date"
             id={`${props.name}-start-date`}

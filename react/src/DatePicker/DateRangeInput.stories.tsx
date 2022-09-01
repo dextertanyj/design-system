@@ -27,6 +27,8 @@ const PickerOnlyTemplate: Story<DateRangePickerProps> = (args) => {
     args.selectedDates ?? [],
   )
   const [hoveredDate, setHoveredDate] = useState<Date | null>(null)
+  args.startDate = args.startDate ? new Date(args.startDate) : undefined
+  args.endDate = args.endDate ? new Date(args.endDate) : undefined
 
   const handleOnDateSelected = (date: Date) => {
     const newDates = [...selectedDates]

@@ -165,10 +165,13 @@ const useProvideCalendar = ({
   const dateToFocus = useMemo(() => {
     let target: Date = today
     if (Array.isArray(selectedDates)) {
-      target = selectedDates[0]
+      target = selectedDates[0] || target
     } else if (selectedDates) {
       target = selectedDates
     }
+    console.log(today)
+    console.log(selectedDates)
+    console.log(target)
     if (target.valueOf() < startDate.valueOf()) {
       return startDate
     }

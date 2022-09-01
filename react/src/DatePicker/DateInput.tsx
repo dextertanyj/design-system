@@ -22,7 +22,7 @@ import { DatePicker, DatePickerProps } from './DatePicker'
 
 export interface DateInputProps
   extends Omit<InputProps, 'value' | 'onChange'>,
-    Pick<DatePickerProps, 'isDateUnavailable'> {
+    Pick<DatePickerProps, 'isDateUnavailable' | 'startDate' | 'endDate'> {
   name: string
   value?: string
   onChange?: (val: string) => void
@@ -62,6 +62,7 @@ export const DateInput = forwardRef<DateInputProps, 'input'>(
 
     return (
       <Flex>
+        {/* TODO: Prevent input of unavailable/out of range dates */}
         <Input
           type="date"
           onKeyDown={handlePreventOpenNativeCalendar}

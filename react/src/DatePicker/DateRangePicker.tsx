@@ -51,6 +51,16 @@ export interface DateRangePickerProps {
    * Date currently being hovered, if any.
    */
   hoveredDate?: Date
+  /**
+   * The first date available for selection.
+   * @precondition Should be before `endDate` (if defined).
+   */
+  startDate?: Date
+  /**
+   * The last date available for selection.
+   * @precondition Should be after `startDate` (if defined).
+   */
+  endDate?: Date
 }
 
 export const DateRangePicker = forwardRef<DateRangePickerProps, 'input'>(

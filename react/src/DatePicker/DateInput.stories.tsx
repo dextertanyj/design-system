@@ -26,6 +26,8 @@ const DatePickerOnlyTemplate: Story<DatePickerProps> = ({
   ...args
 }) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(date)
+  args.startDate = args.startDate ? new Date(args.startDate) : undefined
+  args.endDate = args.endDate ? new Date(args.endDate) : undefined
 
   return (
     <DateInput.DatePicker
